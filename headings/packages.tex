@@ -1,40 +1,42 @@
-% Tikz
-\usetikzlibrary{calc}
-\usetikzlibrary{mindmap,trees,shapes,arrows,backgrounds,topaths}
-\usetikzlibrary{decorations.pathmorphing, shapes.geometric}
+% ------------------------ %
+% 	  Packages		%
+% ------------------------ %
 
-% Text
-\usepackage{enumitem}
-\usepackage{ulem}
-\usepackage{pifont}
-
-% Maths
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amsthm}
-\usepackage{amsopn}
-
-% Plots
-\usepackage{pgfplots}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}
+\usepackage{kmath}
+\usepackage{xparse,pgffor,ifthen,xspace}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{mathrsfs,mathtools,bbm}
+\usepackage{booktabs,dcolumn,multirow,stmaryrd}
+\usepackage{pgfplots,forest}
+\pgfplotsset{compat=newest}
 \usepgfplotslibrary{groupplots}
+\usetikzlibrary{matrix}
+\usetikzlibrary{arrows.meta}
+\usepackage{cleveref,csquotes,comment,lipsum,todonotes,soul}
+\usepackage{glossaries,url,subcaption}
 
-% Tables
-\usepackage{booktabs}
-\usepackage{array}
-\newcolumntype{L}{>$l<$}
-\arraycolsep=1.4pt
-\setlength{\tabcolsep}{3pt}
+\definecolor{cplexcolor}{RGB}{41,128,185}
+\definecolor{scipcolor}{RGB}{22,160,133}
+\definecolor{mosekcolor}{RGB}{46,204,113}
+\definecolor{l0bnbcolor}{RGB}{241,196,15}
+\definecolor{sbnbcolor}{RGB}{230,126,34}
+\definecolor{el0pscolor}{RGB}{192,57,43}
 
-% Algos
-\usepackage[ruled]{algorithm2e}
+\pgfplotscreateplotcyclelist{solver_std_cycle_list}{
+  cplexcolor, line width=5pt, smooth\\
+  scipcolor, line width=5pt, smooth\\
+  mosekcolor, line width=5pt, smooth\\
+  l0bnbcolor, line width=5pt, smooth\\
+  sbnbcolor, line width=5pt, smooth\\
+  el0pscolor, line width=5pt, smooth\\
+  black, line width=5pt, densely dashed\\
+}
 
-% Pgfplot
-\pgfplotsset{
-    legend image code/.code={
-        \draw[mark repeat=2,mark phase=2] plot coordinates {
-            (0cm,0cm)
-            (0.25cm,0cm)
-            (0.25cm,0cm)
-        };
-    }
+\pgfplotscreateplotcyclelist{solver_new_cycle_list}{
+  mosekcolor, line width=5pt, smooth\\
+  el0pscolor, line width=5pt, smooth\\
+  black, line width=5pt, densely dashed\\
 }

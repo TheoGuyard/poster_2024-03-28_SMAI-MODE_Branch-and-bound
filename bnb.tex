@@ -1,0 +1,51 @@
+\forestset{
+    node/.style = {
+        draw, 
+        circle,
+        align = center,
+        font = \small,
+        top color = white,
+        bottom color = blue!25,
+        line width=5pt,
+    },
+    branch label/.style={
+        edge label = {
+            node[midway,fill=white,font=\small,draw=black,text height=0.5em,scale=0.8]{#1}
+        }
+    },
+    bnb/.style={
+        branch label,
+        for tree = {
+            node,
+            s sep'+=40mm,
+            l sep'+=10mm,
+            edge={->},
+            edge+={line width=5pt},
+        },
+        before typesetting nodes={
+            for tree={
+                split option={content}{:}{content,branch label},
+            },
+        },
+        where n children=0{
+            tikz+={
+                \draw [dashed,->,line width=5pt]  ([yshift=0pt, xshift=0pt].south east) -- ([yshift=-15pt, xshift=15pt].south east);
+                \draw [dashed,->,line width=5pt]  ([yshift=0pt, xshift=0pt].south west) -- ([yshift=-15pt, xshift=-15pt].south west);
+            }
+        }{},
+    },
+}
+\begin{forest}
+    bnb,
+    [
+        \(\nodeSymb_{0}\)
+            [\(\nodeSymb_{1}\):\({\idxentry_0 \rightarrow \setzero}\)
+            [\(\nodeSymb_{3}\):\({\idxentry_1 \rightarrow \setzero}\)]
+            [\(\nodeSymb_{4}\):\({\idxentry_1 \rightarrow \setone}\)]
+    ][
+        \(\nodeSymb_{2}\):\({\idxentry_0 \rightarrow \setone}\),
+            [\(\nodeSymb_{5}\):\({\idxentry_2 \rightarrow \setzero}\)]
+            [\(\nodeSymb_{6}\):\({\idxentry_2 \rightarrow \setone}\)]
+    ]
+    ]
+\end{forest}

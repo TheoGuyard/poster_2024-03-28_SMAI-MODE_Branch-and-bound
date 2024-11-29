@@ -1,48 +1,300 @@
-\documentclass[xcolor={x11names},10pt]{beamer}
+\documentclass[final]{beamer}
 
-\usetheme{metropolis}
-\metroset{numbering=fraction}
-\metroset{block=fill}
+\usepackage[scale=1.24]{beamerposter}
+\usepackage{tikz}
+\usepackage{pifont}
+\usetikzlibrary{matrix}
+\usetikzlibrary{positioning}
+\usetikzlibrary{er}
 
-\newcommand{\backupbegin}{
-  \newcounter{finalframe}
-  \setcounter{finalframe}{\value{framenumber}}
+\usetheme{confposter}
+
+\setbeamercolor{block title}{fg=dblue,bg=white}
+\setbeamercolor{block body}{fg=black,bg=white}
+\setbeamercolor{block alerted title}{fg=white,bg=dblue!70}
+\setbeamercolor{block alerted body}{fg=black,bg=dblue!10}
+\setbeamercolor{item}{fg=nblue}
+\setbeamercolor{item projected}{fg=white,bg=nblue}
+
+\newlength{\sepwid}
+\newlength{\onecolwid}
+\newlength{\twocolwid}
+\newlength{\threecolwid}
+\setlength{\paperwidth}{46.8in} % A0 width: 46.8in
+\setlength{\paperheight}{33.1in} % A0 height: 33.1in
+\setlength{\sepwid}{0.024\paperwidth} % Separation width (white space) between columns
+\setlength{\onecolwid}{0.22\paperwidth} % Width of one column
+\setlength{\twocolwid}{0.464\paperwidth} % Width of two columns
+\setlength{\threecolwid}{0.708\paperwidth} % Width of three columns
+\setlength{\topmargin}{-1.5in} % Reduce the top margin size
+
+\usepackage{kmath}
+\include{headings/packages}
+\include{headings/macros}
+\usepackage[pscoord]{eso-pic}
+\newcommand{\placetextbox}[3]{
+  \setbox0=\hbox{#3}
+  \AddToShipoutPictureFG*{
+    \put(\LenToUnit{#1\paperwidth},\LenToUnit{#2\paperheight}){\vtop{{\null}\makebox[0pt][c]{#3}}}
+  }
 }
-\newcommand{\backupend}{
-  \setcounter{framenumber}{\value{finalframe}}
-}
+\usepackage[ruled]{algorithm2e}
+\usepackage{enumitem}
 
-\usepackage{headings/kmath}
-\input{headings/packages}
-\input{headings/macros}
+\newcommand{\emphone}[1]{\textbf{\color{norange}#1}}
 
-\newenvironment<>{blockcolor}[2]{%
-  \setbeamercolor{block title}{fg=#1,bg=#1!15}%
-  \setbeamercolor{block body}{fg=#1,bg=#1!15}%
-  \begin{block}#3{\centering#2}
-}{%
-  \end{block}
-}
+\newacronym{bnb}{BnB}{Branch-and-Bound}
+\newacronym{mip}{MIP}{Mixed-Integer Program}
 
-\definecolor{TolLightWhite}{HTML}{FAFAFA}
-\definecolor{TolLightOrange}{HTML}{ECA244}
+\title{Unifying Branch-and-Bound methods for $\mathbf{\ell}_{\0}$-penalized problems}
+
+\author{Théo Guyard${}^{\star}$, Cédric Herzet${}^{\dagger}$, Clément Elvira${}^{\ddagger}$, Ay\c{s}e-Nur Arslan${}^{\diamond}$}
+
+\institute{${}^{\star}$Inria and Insa Rennes, ${}^{\dagger}$Ensai, ${}^{\ddagger}$CentraleSupélec, ${}^{\diamond}$Inria Bordeaux}
 
 \begin{document}
 
-\begin{frame}[plain,noframenumbering]
-  \begin{center}
-    {\large\textbf{Slides Template}}
-  \end{center}
-  \begin{center}
-    Théo Guyard
-  \end{center}
+
+\addtobeamertemplate{block end}{}{\vspace*{2ex}}
+\addtobeamertemplate{block alerted end}{}{\vspace*{2ex}}
+
+\setlength{\belowcaptionskip}{2ex}
+\setlength\belowdisplayshortskip{2ex}
+
+\begin{frame}[t]
+
+\begin{columns}[t]
+
+\begin{column}{\sepwid}\end{column}
+
+\begin{column}{\onecolwid}
+
+    \setbeamercolor{block alerted title}{fg=white,bg=norange}
+    \setbeamercolor{block alerted body}{fg=black,bg=white}
+    \begin{alertblock}{In short}
+        \centering
+        Provide necessary ingredients to implement \emphone{generic} and \emphone{efficient} $\ell_0$-problem solvers.
+    \end{alertblock}
+
+    \begin{block}{}
+        \setbeamercolor{block alerted title}{fg=white,bg=dblue!70}
+        \setbeamercolor{block alerted body}{fg=black,bg=dblue!10}
+        \begin{alertblock}{$\boldsymbol{\ell}_{\0}$-problem}
+            \centering
+            \begin{tikzpicture}
+                \node (problem) at (current page.north) {$\opt{\pobj} = \textstyle\min_{\pv \in \kR^{\pdim}} \lossfunc(\dic\pv) + \reg\norm{\pv}{0} + \pertfunc(\pv)$};
+                %
+                \node[font=\small] (mip) at ($(problem.south)+(-6,-2)$) {\textbf{Generic solvers}};
+                \node[font=\small] (mip-speed) at ($(mip.south)+(0,-0.75)$)  {\textcolor{OrangeRed}{\ding{55} Slow}};
+                \node[font=\small] (mip-flexible) at ($(mip.south)+(0,-2)$)  {\textcolor{ForestGreen}{\ding{51} Flexible w.r.t $\lossfunc/\pertfunc$}};
+                %
+                \node[font=\small] (bnb) at ($(problem.south)+(6,-2)$) {\textbf{Specialized solvers}};
+                \node[font=\small] (bnb-speed) at ($(bnb.south)+(0,-0.75)$)  {\textcolor{ForestGreen}{\ding{51} Fast}};
+                \node[font=\small] (bnb-flexible) at ($(bnb.south)+(0,-2)$)  {\textcolor{OrangeRed}{\ding{55} Only some $\lossfunc/\pertfunc$}};
+                %
+                \node[font=\small] (contrib) at ($(problem.south)+(0,-8)$) {\textbf{Proposed solver}};
+                \node[font=\small] (contrib-speed) at ($(contrib.south)+(0,-0.75)$)  {\textcolor{ForestGreen}{\ding{51} Fast}};
+                \node[font=\small] (contrib-flexible) at ($(contrib.south)+(0,-2)$) {\textcolor{ForestGreen}{\ding{51} Flexible w.r.t $\lossfunc/\pertfunc$}};
+            \end{tikzpicture}
+        \end{alertblock}
+        ~\\
+        \textbf{Working hypotheses}
+        \begin{itemize}[label=$\bullet \ $,leftmargin=2em]
+            \item $\lossfunc$ simple to work with (convex, smooth, ...)
+            \item $\pertfunc$ proper, closed, separable, cont. at $\pv=\0$
+            \item[\textcolor{lightgray}{$\bullet \ $}] \textcolor{lightgray}{$\pertfunc$ even, convex, coercive, $\pertfunc \geq \pertfunc(\0)=0$}
+        \end{itemize}
+        ~\\
+        \textbf{Versatile toolbox}
+        \begin{figure}
+            \begin{tikzpicture}
+                \node (origin) at ($(current page.north)+(0,0)$) {};
+                %
+                \node[draw,line width=5pt,text width=0.35\linewidth,align=center,rounded corners=0.5cm,inner sep=24] (lossfunc) at ($(origin)+(-6,-6.5)$) {\textbf{User-defined $\lossfunc$} \\
+                \texttt{func\_value} \\
+                \texttt{conj\_value} \\
+                \texttt{prox\_value} \\
+                \texttt{subd\_value}};
+                %
+                \node[draw,line width=5pt,text width=0.35\linewidth,align=center,rounded corners=0.5cm,inner sep=24] (pertfunc) at ($(origin)+(6,-6.5)$) {\textbf{User-defined $\pertfunc$} \\
+                \texttt{func\_value} \\
+                \texttt{conj\_value} \\
+                \texttt{prox\_value} \\
+                \texttt{subd\_value}};
+                %
+                \node[draw,line width=5pt,text width=0.6\linewidth,align=center,rounded corners=0.5cm,inner sep=24] (solver) at ($(origin)+(0,-17)$) {\textbf{\texttt{El0ps}} \\
+                Branch-and-Bound solver \\
+                Tunable strategies \\
+                Acceleration methods};
+                %
+                \draw[->,line width=5pt] (lossfunc.south) -- ($(lossfunc.south)+(0,-2)$);
+                \draw[->,line width=5pt] (pertfunc.south) -- ($(pertfunc.south)+(0,-2)$);
+            \end{tikzpicture}
+        \end{figure}
+    \end{block}
+\end{column}
+
+\begin{column}{\sepwid}\end{column}
+
+\begin{column}{\twocolwid}    
+    \begin{columns}[t,totalwidth=\twocolwid]
+        \begin{column}{\onecolwid}\vspace{-.6in} 
+            \begin{block}{Branch-and-Bound algorithms}
+                \textbf{Principle}
+                \begin{center}
+                    ``Partition the feasible space into \emphone{regions} and \emphone{prune} those that cannot contain minimizers.''
+                \end{center}
+                ~\\
+
+                \textbf{Regions construction}
+                \begin{itemize}[label=$\bullet \ $,leftmargin=2em]
+                    \item $\nodeSymb = (\setzero,\setone)$ disjoint subsets of $\{1,\dots,\pdim\}$
+                    \item $\setzero$ entries fixed to zero
+                    \item $\setone$ entries fixed to non-zero
+                \end{itemize}
+                \begin{equation*}
+                    \textcolor{norange}{\node{\pset} = \kset{\pv \in \kR^{\pdim}}{\pv_{\setzero} = \0, \ \pv_{\setone} \neq \0}}
+                \end{equation*}
+                \begin{itemize}[label=$\bullet \ $,leftmargin=2em]
+                    \item All regions explored: problem solved
+                \end{itemize}
+                ~\\
+
+                \textbf{Feasible space exploration}
+                \begin{figure}
+                    \centering
+                    \input{bnb}
+                \end{figure}
+
+                \textbf{Processing nodes}
+                \begin{itemize}[label=$\bullet \ $,leftmargin=2em]
+                    \item Node problem
+                \end{itemize}
+                \begin{equation*}
+                    \textstyle
+                    \node{\pobj} = 
+                    \min_{\textcolor{norange}{\pv \in \node{\pset}}} \lossfunc(\dic\pv) + \reg\norm{\pv}{0} + \pertfunc(\pv)
+                \end{equation*}
+                \begin{itemize}[label=$\bullet \ $,leftmargin=2em]
+                    \item Test if region $\node{\pset}$ contains minimizers: $\node{\pobj} > \opt{\pobj}$
+                    \item Practical \textcolor{norange}{pruning test} with bounds
+                    \begin{equation*}
+                        \node{\pobj} \geq \textcolor{norange}{\node{\LB{\pobj}} > \UB{\pobj}} \geq \opt{\pobj}
+                    \end{equation*}
+                    \item Upper bound $\UB{\pobj}$ on $\opt{\pobj}$
+                    \begin{itemize}[label=$\rightarrow \ $,leftmargin=2em]
+                        \item Evaluate objective at any point
+                        \item Efficient heuristics
+                    \end{itemize}
+                \end{itemize}
+            \end{block}
+        \end{column}
+
+        \begin{column}{\onecolwid}\vspace{-.6in}
+            \begin{block}{Generic relaxations}
+                \begin{alertblock}{Constructing lower-bounds}
+                    \centering
+                    \begin{tikzpicture}
+                        \node (node-func) at (current page.north) {\textbf{Node problem reformulation}};
+                        \node (node-func-eq) at ($(node-func.south)+(0,-1)$) {$\node{\pobj} = \textstyle\min_{\pv \in \kR^{\pdim}} \lossfunc(\dic\pv) + \textcolor{norange}{\node{\regfunc}}(\pv)$};
+                        \node (node-func-eq2) at ($(node-func-eq.south)+(0,-3)$) {with $\node{\separable{\regfunc}{\idxentry}}(\pvi{\idxentry}) = \begin{cases}
+                            \mathbf{I}(\pvi{\idxentry} = 0) &\text{if} \  \idxentry \in \setzero \\
+                            \separable{\pertfunc}{\idxentry}(\pvi{\idxentry}) + \reg &\text{if} \  \idxentry \in \setone \\
+                            \separable{\pertfunc}{\idxentry}(\pvi{\idxentry}) + \reg\norm{\pvi{\idxentry}}{0} &\text{otherwise}
+                        \end{cases}$};
+                        %
+                        \node (primal-relax) at ($(node-func-eq2.south)+(0,-2)$) {\textbf{Primal relaxation}};
+                        \node (primal-pb) at ($(primal-relax.south)+(0,-1)$) {$\textstyle\min_{\pv \in \kR^{\pdim}} \lossfunc(\dic\pv) + \textcolor{norange}{\biconj{(\node{\regfunc})}}(\pv)$};
+                        %
+                        \node (dual-relax) at ($(primal-pb.south)+(0,-2)$) {\textbf{Dual relaxation}};
+                        \node (primal-pb) at ($(dual-relax.south)+(0,-1)$) {$\textstyle\max_{\dv \in \kR^{\ddim}} -\conj{\lossfunc}(-\dv) + \textcolor{norange}{\conj{(\node{\regfunc})}}(\transp{\dic}\dv)$};
+                    \end{tikzpicture}
+                \end{alertblock}
+
+                \textbf{Closed-form expressions}
+                \begin{itemize}[label=$\bullet \ $,leftmargin=2em]
+                    \item 1D-study of $\regfunc(\pvi{}) = \pertfunc(\pvi{}) + \reg\norm{\pvi{}}{0}$
+                    \item Parameters \textcolor{norange}{$(\pertslope,\pertlimit)$} easily computable from \textcolor{norange}{$\conj{\pertfunc}$}
+                    \item Closed-form expressions
+                \end{itemize}
+                \begin{align*}
+                    \biconj{\regfunc}(\pvi{}) &= 
+                    \begin{cases}
+                        \textcolor{norange}{\pertslope}\abs{\pvi{}} &\text{if} \ \abs{\pvi{}} \leq \textcolor{norange}{\pertlimit} \\
+                        \pertfunc(\pvi{}) + \reg \ \, \, &\text{if} \ \abs{\pvi{}} > \textcolor{norange}{\pertlimit}
+                    \end{cases} \\
+                    \conj{\regfunc}(\dvi{}) &= 
+                    \begin{cases}
+                        0 &\text{if} \ \abs{\dvi{}} \leq \textcolor{norange}{\pertslope} \\
+                        \conj{\pertfunc}(\dvi{}) - \reg &\text{if} \ \abs{\dvi{}} > \textcolor{norange}{\pertslope}
+                    \end{cases}
+                \end{align*}
+                \begin{itemize}[label=$\bullet \ $,leftmargin=2em]
+                    \item Simple evaluation of prox, subdiff, ...
+                \end{itemize}
+                \setlength{\fboxrule}{5pt}
+                \fbox{
+                \begin{minipage}{\textwidth}
+                \begin{figure}
+                    \centering
+                    \input{biconj}
+                \end{figure}
+                \begin{figure}
+                    \centering
+                    \input{conj}
+                \end{figure}
+                \end{minipage}
+                }
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{column}
+
+\begin{column}{\sepwid}\end{column}
+
+\begin{column}{\onecolwid}
+    \begin{block}{Numerical results}
+        \textbf{Standard instances}
+
+        \begin{itemize}[label=$\bullet \ $,leftmargin=2em]
+            \item $\lossfunc$: least-squares
+            \item $\pertfunc$: bound-cstr. or $\ell_2$-norm (left/right)
+            \item $\reg$: tuned statistically
+        \end{itemize}
+        \begin{figure}
+            \centering
+            \input{perfprofiles_std}
+        \end{figure}
+        \vspace*{-1.5cm}
+            
+        \textbf{New application opportunities}
+        \begin{itemize}[label=$\bullet \ $,leftmargin=2em]
+            \item $\lossfunc$: logistic
+            \item $\pertfunc$: bound-cstr. + $\ell_1$- or $\ell_2$-norm (left/right)
+            \item $\reg$: tuned statistically
+        \end{itemize}
+        \begin{figure}
+            \centering
+            \input{perfprofiles_new}
+        \end{figure}
+        \vspace*{-1cm}
+        \begin{center}
+            \large\textcolor{ForestGreen}{\ding{51} \textbf{Fast}} \\
+            \large\textcolor{ForestGreen}{\ding{51} \textbf{Flexible w.r.t $\lossfunc/\pertfunc$}}
+        \end{center}
+        ~\\
+        \setbeamercolor{block alerted title}{fg=white,bg=norange}
+        \setbeamercolor{block alerted body}{fg=black,bg=white}
+        \begin{alertblock}{Take home message}
+            \centering
+            Opportunities to address new instances of $\ell_0$-problems efficiently.
+        \end{alertblock}
+    \end{block}
+\end{column} 
+
+\begin{column}{\sepwid}\end{column}
+
+\end{columns}
 \end{frame}
-
-% Main slides
-
-% \backupbegin
-% Supplementary slides
-% \backupend
-
 
 \end{document}

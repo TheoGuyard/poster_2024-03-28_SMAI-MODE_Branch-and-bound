@@ -1,0 +1,70 @@
+\begin{tikzpicture}
+    \begin{groupplot}[
+        group style     = {
+            group size      = 2 by 1,
+            xticklabels at  = edge bottom,
+            yticklabels at  = edge left,
+            vertical sep    = 10pt,
+            horizontal sep  = 70pt,
+        },
+        height          = 0.35\linewidth,
+        width           = 0.4\linewidth,
+        ymin            = -0.05,
+        ymax            = 1.05,
+        xmode           = log,
+        ytick           = {0,0.25,0.5,0.75,1},
+        yticklabels     = {0\%,25\%,50\%,75\%,100\%},
+        xtick           = {0.01,0.1,1,10,100,1000,10000},
+        xticklabels     = {$10^{-2}$, , ,$10^{1}$, , ,$10^{4}$},
+        ytick pos       = left,
+        xtick pos       = bottom,
+        grid            = major,
+    ]
+    
+        % ------------------
+        % FIRST ROW
+        % ------------------
+
+        \nextgroupplot[
+            xlabel          = Time,
+            ylabel          = Prop. solved,
+            cycle list name = solver_new_cycle_list,
+        ]
+        \foreach \solver in {Mosek,El0ps}{
+            \addplot table[
+                x       = times, 
+                y       = \solver,
+                col sep = comma,
+            ] {dat/perfprofiles_Logistic_BigmL1norm.csv};
+            \label{plots:perfprofiles_\solver}
+        };
+        \coordinate (top) at (rel axis cs:0,1);
+
+        \nextgroupplot[
+            xlabel          = Time,
+            cycle list name = solver_new_cycle_list,
+        ]
+        \foreach \solver in {Mosek,El0ps}{
+            \addplot table[
+                x       = times, 
+                y       = \solver,
+                col sep = comma,
+            ] {dat/perfprofiles_Logistic_BigmL2norm.csv};
+        };
+        \coordinate (bot) at (rel axis cs:1,0);
+    \end{groupplot}
+    \path (top|-current bounding box.north)--
+    coordinate(legendpos)
+    (bot|-current bounding box.north);
+    \matrix[
+        matrix of nodes,
+        anchor=north,
+        draw,
+        inner sep=0.2em,
+        every node/.style={anchor=base west, font=\small},
+    ] at([yshift=4ex,xshift=-3ex]legendpos)
+    {
+        \ref{plots:perfprofiles_Mosek} & \texttt{Mosek} & [10pt]
+        \ref{plots:perfprofiles_El0ps} & \texttt{El0ps} \\
+    };
+\end{tikzpicture}

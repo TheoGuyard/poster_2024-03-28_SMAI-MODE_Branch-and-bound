@@ -1,0 +1,22 @@
+\setlength{\algomargin}{0.5em}
+\setlength{\algoheightrule}{0.2em}
+\setlength{\algotitleheightrule}{0.2em}
+\SetInd{0.5em}{1em}
+\begin{algorithm}[H]
+    \DontPrintSemicolon
+    % \SetKwInOut{Input}{Input}
+    % \Input{}
+    Create a root node $\nu^0$ and initialize $\mathcal{Q} = \{\nu^0\}$\;
+    \While{$\mathcal{Q} \neq \emptyset$}{
+        {\color{nblue}\textbf{1)}} Select a new node $\nu$ in $\mathcal{Q}$\;
+        {\color{nblue}\textbf{2)}} Find a lower and an upper bound on the node problem objective value\;
+        {\color{nblue}\textbf{3)}} Update the best upper bound known\;
+        \If{node LB $\leq$ best UB}{
+            {\color{nblue}\textbf{4)}} Create child nodes of $\nu$ by fixing new constraints and push them in $\mathcal{Q}$
+        }
+        {\color{nblue}\textbf{5)}} Remove $\nu$ from $\mathcal{Q}$
+    }
+    \Return{any node yielding the best UB} 
+    \caption{\gls{bnb} algorithm}
+    \label{algo:bnb}
+\end{algorithm}
